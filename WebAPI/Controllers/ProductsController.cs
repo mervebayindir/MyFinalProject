@@ -29,11 +29,6 @@ namespace WebAPI.Controllers
         [HttpGet("getall")]
         public IActionResult GetAll()
         {
-            //Swagger
-            //Dependency chain --
-
-            Thread.Sleep(1000);
-
             var result =  _productService.GetAll();
             if (result.Success)
             {
@@ -90,6 +85,26 @@ namespace WebAPI.Controllers
             return BadRequest(result);
         }
 
+        [HttpPost("update")]
+        public IActionResult Update(Product product)
+        {
+            var result = _productService.Update(product);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+        [HttpGet("delete")]
+        public IActionResult Delete(int id)
+        {
+            var result = _productService.Delete(id);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
 
     }
 }

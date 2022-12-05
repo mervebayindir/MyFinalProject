@@ -32,7 +32,6 @@ namespace Business.Concrete
             _categoryService = categoryService;
         }
 
-        //00.25 Dersteyiz
         //Claim
         //[SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
@@ -60,10 +59,6 @@ namespace Business.Concrete
         [CacheAspect] //key,value
         public IDataResult<List<Product>> GetAll()
         {
-            if (DateTime.Now.Hour == 1)
-            {
-                return new ErrorDataResult<List<Product>>(Messages.MaintenanceTime);
-            }
 
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(), Messages.ProductsListed);
         }
@@ -94,17 +89,52 @@ namespace Business.Concrete
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
         }
 
+
         [ValidationAspect(typeof(ProductValidator))]
-        [CacheRemoveAspect("IProductService.Get")]
+        [CacheRemoveAspect("IProductService.Update")]
         public IResult Update(Product product)
         {
-            var result = _productDal.GetAll(p => p.CategoryId == product.CategoryId).Count;
-            if (result >= 10)
+
+            //Aynı isimde ürün eklenemez
+            IResult result = BusinessRules.Run(CheckIfProductNameExists(product.ProductName));
+
+            if (result != null)
             {
-                return new ErrorResult(Messages.ProductCountOfCategoryError);
+                return result;
             }
-            throw new NotImplementedException();
+
+            _productDal.Update(product);
+
+            return new SuccessResult(Messages.ProductUpdated);
+
         }
+
+        public IResult Delete(int id)
+        {
+
+            if (id == null)
+            {
+                return null;
+            }
+
+            var product = _productDal.GetAll(x => x.ProductId == id).FirstOrDefault();
+            _productDal.Delete(product);
+
+            return new SuccessResult(Messages.ProductUpdated);
+
+        }
+
+        //[ValidationAspect(typeof(ProductValidator))]
+        //[CacheRemoveAspect("IProductService.Get")]
+        //public IResult Update(Product product)
+        //{
+        //    var result = _productDal.GetAll(p => p.CategoryId == product.CategoryId).Count;
+        //    if (result >= 10)
+        //    {
+        //        return new ErrorResult(Messages.ProductCountOfCategoryError);
+        //    }
+        //    throw new NotImplementedException();
+        //}
 
         private IResult CheckIfProductCountOfCategoryCorrect(int categoryId)
         {
@@ -152,6 +182,5 @@ namespace Business.Concrete
 
             return null;
         }
-
     }
 }
