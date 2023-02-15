@@ -1,39 +1,36 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Business.Abstract;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Business.Abstract;
 
 namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController : ControllerBase
+    public class OrdersController : ControllerBase
     {
-        private ICategoryService _categoryService;
+        IOrderService _orderService;
 
-        public CategoriesController(ICategoryService categoryService)
+        public OrdersController(IOrderService orderService)
         {
-            _categoryService = categoryService;
+            _orderService = orderService;
         }
-
         [HttpGet("getall")]
         public IActionResult GetAll()
         {
-            var result = _categoryService.GetAll();
+            var result = _orderService.GetAll();
             if (result.Success)
             {
                 return Ok(result);
             }
             return BadRequest(result);
-
         }
-
-        public IActionResult GetById(int categoryId)
+        [HttpGet("getbyid")]
+        public IActionResult GetById(int orderId)
         {
-            var result = _categoryService.GetById(categoryId);
+            var result = _orderService.GetById(orderId);
             if (result.Success)
             {
                 return Ok(result);
